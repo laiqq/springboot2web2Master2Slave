@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <include resource="org/springframework/boot/logging/logback/defaults.xml"/>
+ 	<property name="LOG_FILE" value="${LOG_FILE:-${LOG_PATH:-${LOG_TEMP:-${java.io.tmpdir:-/tmp}}}/spring.log}"/>
+    <property name="log_level_jdbc" value="DEBUG" />
+    <include resource="org/springframework/boot/logging/logback/console-appender.xml"/>
+
+    <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${LOG_PATH}/api-platform.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <fileNamePattern>${LOG_PATH}/api-platform-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+            <maxFileSize>10MB</maxFileSize>
+            <totalSizeCap>10GB</totalSizeCap>
+            <maxHistory>30</maxHistory>
+        </rollingPolicy>
+        <encoder>
+            <pattern>%X{logback.sessionId} %X{logback.ip} %date{HH:mm:ss.SSS} [%thread] %-5level %logger{36}[%line] - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <appender name="ERROR_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${LOG_PATH}/api-platform-error.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <fileNamePattern>${LOG_PATH}/api-platform-error-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+            <maxFileSize>10MB</maxFileSize>
+            <totalSizeCap>10GB</totalSizeCap>
+            <maxHistory>30</maxHistory>
+        </rollingPolicy>
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>ERROR</level>
+        </filter>
+
+        <append>false</append>
+        <encoder>
+            <pattern>%X{logback.sessionId} %X{logback.ip} %date{HH:mm:ss.SSS} [%thread] %-5level %logger{36}[%line] - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+
+    <logger name="org.springframework" level="info"/>
+    <logger name="com.alibaba.druid" level="info"/>
+	
+	
+	<logger name="jdbc.sqltiming" level="debug"/>
+    <logger name="com.ibatis" level="debug" />
+    <logger name="com.ibatis.common.jdbc.SimpleDataSource" level="debug" />
+    <logger name="com.ibatis.common.jdbc.ScriptRunner" level="debug" />
+    <logger name="com.ibatis.sqlmap.engine.impl.SqlMapClientDelegate"
+        level="debug" />
+    <logger name="java.sql.Connection" level="debug" />
+    <logger name="java.sql.Statement" level="debug" />
+    <logger name="java.sql.PreparedStatement" level="debug" />
+    <logger name="java.sql.ResultSet" level="debug" />
+    <root level="debug">
+        <appender-ref ref="CONSOLE"/>
+        <appender-ref ref="FILE"/>
+        <appender-ref ref="ERROR_FILE"/>
+    </root>
+</configuration>

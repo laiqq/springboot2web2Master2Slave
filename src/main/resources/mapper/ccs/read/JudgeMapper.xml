@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.jony.platform.mapper.ccs.read.JudgeMapper" >
+
+	<select id="selectJudgeContrIsOverdueByContrNbr" resultType="java.lang.String">
+  	select IF(loan.OVERDUE_DATE,1,0) as IS_DELAY 
+  	from ccs_loan loan 
+  	where loan.CONTR_NBR= #{contrNbr}
+  	</select>
+  	
+  	<select id="selectLoanFeeDefIdByContrNbr" resultType="java.lang.String">
+  	select loan.LOAN_FEE_DEF_ID 
+  	from ccs_loan loan 
+  	where loan.CONTR_NBR = #{contrNbr}
+  	</select>
+  	
+  	<select id="selectEarlyClearByContrNbr" resultType="java.lang.String">
+  	select 
+CASE WHEN loan.PAID_OUT_DATE is NULL and  loan.OVERDUE_DATE is NULL 
+and (DATEDIFF((select rs.LOAN_PMT_DUE_DATE from ccs_repay_schedule rs where rs.REF_NBR=loan.REF_NBR and rs.CURR_TERM=loan.CURR_TERM+1)
+,(SELECT BUSINESS_DATE from kb_system_status))
+>=
+(
+select ExtractValue(p.PARAM_OBJECT, 
+CONCAT('/cn.sunline.ccs.param.def.LoanPlan/loanFeeDefMap/entry[int="'
+ ,#{loanFeeDefId},
+'"]/cn.sunline.ccs.param.def.LoanFeeDef/prepayApplyCutDay'
+)
+) from tm_prm_object p where p.PARAM_CLASS like '%LoanPlan' and p.PARAM_KEY = loan.LOAN_CODE
+))
+THEN
+1
+ELSE
+0
+END as IS_EARLY_REPAY
+ from ccs_loan loan where loan.CONTR_NBR= #{contrNbr}
+  	</select>
+  	
+</mapper>
